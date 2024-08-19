@@ -218,14 +218,18 @@ def SInceIGB(p,m,q,z):
 
 class InceGaussian:
     def __init__(self, L: float,
-                 N: int,
-                 parity,
-                 p,
-                 m,
-                 e,
-                 w0,
-                 k,
-                 z) -> None:
+                 parity: int,
+                 p: int,
+                 m: int,
+                 e: float,
+                 w0: float,
+                 k: float,
+                 z: float = 0,
+                 N: int = 501) -> None:
+        
+        """
+        Ince-Gaussian Modes
+        """
     
         self.L = L
         self.N = N
