@@ -219,8 +219,8 @@ def SInceIGB(p,m,q,z):
 class InceGaussian:
     def __init__(self, L: float,
                  parity: int,
-                 p: int,
-                 m: int,
+                 p,
+                 m,
                  e: float,
                  w0: float,
                  k: float,
@@ -317,6 +317,7 @@ class InceGaussian:
     def plot_phase(self):
         plt.imshow(np.angle(self.IGB) ,cmap= 'gray')
         plt.title(f'Phase Ince-Gaussian Mode p={self.p}, m = {self.m}, $\epsilon$ = {self.e}, z = {self.z}')
+        plt.colorbar()
         plt.xlabel('x(m)')
         plt.ylabel('y(m)')
         plt.show()
@@ -337,9 +338,13 @@ class InceGaussian:
 
 
 
-Ince = InceGaussian(15e-3, 501, 0, 6, 2, 2, 4e-3, (2*np.pi/632.8e-9), 0.375)
+Ince = InceGaussian(L = 15e-3, 
+                    N = 501, 
+                    parity = 0, 
+                    p = 6, 
+                    m = 2, 
+                    e = 2, 
+                    w0 = 4e-3, 
+                    k = (2*np.pi/632.8e-9),
+                    z = 0.375)
 Ince.plot_amplitude()
-
-#xhi, etha, x, y = Mesh_Elliptic(0.0030, 0.015, 501)
-#plt.imshow(etha, cmap= 'gray')
-#plt.show()

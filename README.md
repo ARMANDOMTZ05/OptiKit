@@ -4,11 +4,14 @@
  ## Ince-Gaussian Modes
  The Ince-Gaussian (IG) mode is a solution to the paraxial wave equation expressed in elliptic coordinates $(\xi, \eta)$. The general form of an Ince-Gaussian beam $(\xi, \eta, z)$ can be written as:
 
-$\text{IG}_{p,m}^e(\mathbf{r}, \epsilon) = \frac{C\omega_0}{\omega(z)}C_p^m(i\xi, \epsilon)C_p^m(\eta, \epsilon)\exp\left[\frac{-r^2}{\omega^2(z)}\right] \exp\left(i\left[kz + \frac{kr^2}{2R(z)} - (p - 1) \Psi_{GS}(z)\right]\right)$,
+$\text{IG}_{p,m}^e(\mathbf{r}, \epsilon) = \frac{C\omega_0}{\omega(z)}C_p^m(i\xi, \epsilon)C_p^m(\eta, \epsilon)\exp\left[\frac{-r^2}{\omega^2(z)}\right] \exp\left(i\left[kz + \frac{kr^2}{2R(z)} - (p - 1) \Psi_{GS}(z)\right]\right)$
+
+where C is normalization constant and the superindices $e$ refers to even modes
 
 $\text{IG}_{p,m}^o(\mathbf{r}, \epsilon) = \frac{S\omega_0}{\omega(z)}S_p^m(i\xi, \epsilon)S_p^m(\eta, \epsilon)\exp\left[\frac{-r^2}{\omega^2(z)}\right] \exp\left(i\left[kz + \frac{kr^2}{2R(z)} - (p - 1) \Psi_{GS}(z)\right]\right)$
 
-where C and S are normalization constants and the superindices $e$ and $o$ refer to even and odd modes, respectively.
+where S is normalization constants and the superindices $o$ refer to odd modes.
+
 
 ## Laguerre-Gaussian modes
 
