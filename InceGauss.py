@@ -40,7 +40,7 @@ def CInceIBG(p,m,q,z):
         h,w = z.shape
         z = np.transpose(np.ravel(z, order='F'))
 
-    normalization = 1
+    normalization = True
 
     if p % 2 == 0:
         l = p//2
@@ -62,16 +62,18 @@ def CInceIBG(p,m,q,z):
             ets = np.sort(ets)
             A = A[:,index]
 
-        if normalization == 0:
-            n2 = 2*A[0,n-1] ** 2 + np.sum(A[1:N*1, n-1] **2)
-            ns = np.sign(np.sum(A[:,n-1]))
-            A = A/np.sqrt(n2)*ns
-        
-        else:
+        if normalization:
             mv = np.arange(2,p,2)
             n2 = np.sqrt(A[0,n-1] ** 2 * 2 * factorial(p/2) ** 2 + np.sum((np.sqrt(factorial((p+mv)/2) * factorial((p-mv)/2)) * A[1:p//2, n-1]) ** 2))
             ns = np.sign(np.sum(A[:,n-1]))
             A = A/n2*ns
+        
+        else:
+            n2 = 2*A[0,n-1] ** 2 + np.sum(A[1:N*1, n-1] **2)
+            ns = np.sign(np.sum(A[:,n-1]))
+            A = A/np.sqrt(n2)*ns
+        
+            
 
         r = np.arange(0,N)
         R, X = np.meshgrid(r,z)
@@ -303,14 +305,14 @@ class InceGaussian:
 
     def plot_amplitude(self):
         plt.imshow(np.abs(self.IGB), extent=[-self.L, self.L, -self.L, self.L] ,cmap= 'gray')
-        plt.title(f'Ince Gaussian Beam p={self.p}, m = {self.m}')
+        plt.title(f'Ince-Gaussian Mode p={self.p}, m = {self.m}, $\epsilon$={self.e}, z={self.z}')
         plt.xlabel('x(m)')
         plt.ylabel('y(m)')
         plt.show()
 
     def plot_phase(self):
         plt.imshow(np.angle(self.IGB) ,cmap= 'gray')
-        plt.title(f'Phase Ince Gaussian Beam p={self.p}, m = {self.m}')
+        plt.title(f'Phase Ince-Gaussian Mode p={self.p}, m = {self.m}, $\epsilon$ = {self.e}, z = {self.z}')
         plt.xlabel('x(m)')
         plt.ylabel('y(m)')
         plt.show()
@@ -332,7 +334,7 @@ class InceGaussian:
 
 
 Ince = InceGaussian(15e-3, 501, 0, 6, 2, 2, 4e-3, (2*np.pi/632.8e-9), 0.375)
-Ince.Hologam()
+Ince.plot_amplitude()
 
 #xhi, etha, x, y = Mesh_Elliptic(0.0030, 0.015, 501)
 #plt.imshow(etha, cmap= 'gray')
