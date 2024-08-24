@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.special import factorial, hermite
+from PIL import Image
 
 def HP(n, x):
     """
@@ -19,8 +20,9 @@ def HP(n, x):
     return H_n_x
 
 class HermiteGaussian:
-    def __init__(self,L,
-                size, 
+    def __init__(self,
+                L:int,
+                size: int, 
                 n,
                 m,
                 w0,
@@ -66,19 +68,55 @@ class HermiteGaussian:
         plt.ylabel('y(m)')
         plt.show()
 
-    def Hologam(self):
+    def Hologam(self, gamma, theta, save:bool = False):
         '''
-        Considering a DMD with resolution of 1920x1080
+        Considering a DMD resolution of 1920x1080
         '''
-        Amp = np.abs(self.HGB)
+
+        self.kxy = self.k *np.sin(gamma)
+        self.kx = self.kxy * np.cos(theta)
+        self.ky = self.kxy * np.sin(theta)
+
+        Hologram = np.zeros((1080, 1920), dtype= np.uint8)
+
+        Beam = np.exp(1j* (self.kx * self.X + self.ky * self.Y)) * self.HGB
+
+        Amp = np.abs(Beam)
         Amp = Amp/np.max(Amp)
 
-        phi = np.angle(self.HGB)
+        phi = np.angle(Beam)
         pp = np.arcsin(Amp)
 
         qq = phi
 
-        self.CGH = 0.5 + 0.5 * np.sign(np.cos(pp) + np.cos(qq))
+        CoGH = _insertImage(1 - (0.5 + 0.5 * np.sign(np.cos(pp) + np.cos(qq))), Hologram)
+
+        if save:
+            Image.fromarray(CoGH * 255).convert('1').save('InceGauss.png')
+
+        return np.round((2**8-1)* CoGH).astype('uint8')
+
+
+
+def _insertImage(image,image_out):
+
+    N_v, N_u = image_out.shape
+
+    S_u = image.shape[1]
+    S_v = image.shape[0]
+  
+    u1, u2 = int(N_u/2 - S_u/2), int(N_u/2 + S_u/2)
+    v1, v2 = int(N_v/2 - S_v/2), int( N_v/2 + S_v/2)
+
+    if u1 < 0 or u2 > N_u:
+        raise Exception("Image could not be inserted because it is either too large in the u-dimension or the offset causes it to extend out of the input screen size")
+    if v1 < 0 or v2 > N_v:
+        raise Exception("Image could not be inserted because it is either too large in the v-dimension or the offset causes it to extend out of the input screen size")
+        
+    image_out[v1:v2,u1:u2] = image
+
+
+    return image_out
 
 
 

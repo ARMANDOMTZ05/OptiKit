@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.special import genlaguerre, factorial
+from PIL import Image
 
 
 def LP(n, alpha, x):
@@ -30,12 +31,19 @@ class LaguerreGaussian:
         self.k = k
         self.z = z
 
+        gamma = np.pi/3000
+        theta2 = np.pi/4
+
+        self.kxy = self.k *np.sin(gamma)
+        self.kx = self.kxy * np.cos(theta2)
+        self.ky = self.kxy * np.sin(theta2)
+
 
         x, y = np.linspace(-self.L, self.L, self.size), np.linspace(-self.L, self.L, self.size)
-        Y, X = np.meshgrid(x, y)
+        self.Y, self.X = np.meshgrid(x, y)
 
-        r = np.sqrt(X ** 2 + Y ** 2)
-        theta = np.arctan2(Y,X)
+        r = np.sqrt(self.X ** 2 + self.Y ** 2)
+        theta = np.arctan2(self.Y,self.X)
 
         if self.z == 0:
             lgb = (1/self.w0) * (r*np.sqrt(2)/self.w0)**(np.abs(self.l)) * np.exp(-r**2/self.w0**2) * LP(self.p, np.abs(self.l), 2*r**2/self.w0**2) * np.exp(-1j*self.l*theta)
@@ -68,18 +76,53 @@ class LaguerreGaussian:
         plt.ylabel('y(m)')
         plt.show()
 
+    def Hologam(self, gamma, theta, save:bool = False):
+        '''
+        Considering a DMD resolution of 1920x1080
+        '''
+
+        self.kxy = self.k *np.sin(gamma)
+        self.kx = self.kxy * np.cos(theta)
+        self.ky = self.kxy * np.sin(theta)
+
+        Hologram = np.zeros((1080, 1920), dtype= np.uint8)
+
+        Beam = np.exp(1j* (self.kx * self.X + self.ky * self.Y)) * self.LGB
+
+        Amp = np.abs(Beam)
+        Amp = Amp/np.max(Amp)
+
+        phi = np.angle(Beam)
+        pp = np.arcsin(Amp)
+
+        qq = phi
+
+        CoGH = _insertImage(1 - (0.5 + 0.5 * np.sign(np.cos(pp) + np.cos(qq))), Hologram)
+
+        if save:
+            Image.fromarray(CoGH * 255).convert('1').save('InceGauss.png')
+
+        return np.round((2**8-1)* CoGH).astype('uint8')
 
 
 
+def _insertImage(image,image_out):
 
-LGB = LaguerreGaussian(L = 15e-3,
-                      size = 501,
-                      p = 3,
-                      l = 3,
-                      w0 = 4e-3,
-                      k = (2*np.pi/632.8e-9),
-                      z = 0.375)
-LGB.plot_phase()
+    N_v, N_u = image_out.shape
+
+    S_u = image.shape[1]
+    S_v = image.shape[0]
+  
+    u1, u2 = int(N_u/2 - S_u/2), int(N_u/2 + S_u/2)
+    v1, v2 = int(N_v/2 - S_v/2), int( N_v/2 + S_v/2)
+
+    if u1 < 0 or u2 > N_u:
+        raise Exception("Image could not be inserted because it is either too large in the u-dimension or the offset causes it to extend out of the input screen size")
+    if v1 < 0 or v2 > N_v:
+        raise Exception("Image could not be inserted because it is either too large in the v-dimension or the offset causes it to extend out of the input screen size")
+        
+    image_out[v1:v2,u1:u2] = image
 
 
+    return image_out
 

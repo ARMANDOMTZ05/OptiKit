@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.special import factorial
 import matplotlib.pyplot as plt
+from PIL import Image
 
 def Mesh_Elliptic(f, L, N):
     """"
@@ -144,7 +145,7 @@ def SInceIGB(p,m,q,z):
     if p % 2 == 0:
         l = p//2
         N = l + 1
-        n = m//N
+        n = m//2
 
         diag_upper = q*(l + np.arange(2, N))
         diag_lower = q*(l - np.arange(1, N-1))
@@ -157,7 +158,7 @@ def SInceIGB(p,m,q,z):
         A = A[:, index]
 
         # Normalization
-        r = np.arange(1,N-1)
+        r = np.arange(1,N)
 
         if normalizaton:
             mv = np.arange(2, p + 1, 2)
@@ -183,12 +184,19 @@ def SInceIGB(p,m,q,z):
         diag_upper = q/2*(p + (2*np.arange(N-1) + 3))
         diag_lower = q/2*(p - (2*np.arange(1, N) - 1))
         diag_main = np.concatenate([[-q/2 - p*q/2 + 1], (2 * np.arange(1, N) + 1)**2])
+
         M = np.diag(diag_upper, k = 1) + np.diag(diag_lower, k = -1) + np.diag(diag_main)
-        
-        ets, A = np.linalg.eig(M)
-        index = np.argsort(ets)
-        ets = np.sort(ets)
-        A = A[:, index]
+
+        if M == -1:
+            ets = np.array([-1])
+            A = np.array([1])[:,np.newaxis]
+            index = np.array([0])
+
+        else:        
+            ets, A = np.linalg.eig(M)
+            index = np.argsort(ets)
+            ets = np.sort(ets)
+            A = A[:, index]
 
         r = 2*np.arange(N) + 1
 
@@ -258,8 +266,8 @@ class InceGaussian:
         self.f0 = np.sqrt(self.e / 2) * self.w0
 
         if self.z == 0:
-            xhi,etha, X, Y = Mesh_Elliptic(self.f0,L,N)
-            R = np.sqrt(X**2 + Y**2)
+            xhi,etha, self.X, self.Y = Mesh_Elliptic(self.f0,L,N)
+            R = np.sqrt(self.X**2 + self.Y**2)
 
             if self.parity == 0:
                 igb = CInceIBG(self.p, self.m, self.e,etha)[0] * CInceIBG(self.p,self.m, self.e, 1j*xhi)[0] * np.exp(-(R/self.w0) ** 2)
@@ -272,8 +280,8 @@ class InceGaussian:
             wz = self.w0 * np.sqrt(1 + (z/zr) ** 2)
             Rz = z * (1 + (zr / z) ** 2)
             f = self.f0 * wz / w0
-            xhi, etha, X, Y = Mesh_Elliptic(f, self.L, self.N)
-            R = np.sqrt(X ** 2 + Y ** 2)
+            xhi, etha, self.X, self.Y = Mesh_Elliptic(f, self.L, self.N)
+            R = np.sqrt(self.X ** 2 + self.Y ** 2)
 
             self.phase = np.exp(1j * (self.k*z + self.k * R ** 2 / (2*Rz) - (self.p + 1) * np.arctan(z/zr)))
 
@@ -294,7 +302,7 @@ class InceGaussian:
             if p % 2 == 0:
                 _, _, coef, ds0 = SInceIGB(self.p,self.m,self.e,0)
                 dsp = SInceIGB(self.p, self.m, self.e, np.pi/2)[-1]
-                Norm = (-1) ** (self.m/2) * np.sqrt(2) * factorial((self.p + 2)/2) * coef[0] * np.sqrt(2/np.pi) / self.w0 / ds0 / dsp
+                Norm = (-1) ** (self.m/2) * np.sqrt(2) *self.e* factorial((self.p + 2)/2) * coef[0] * np.sqrt(2/np.pi) / self.w0 / ds0 / dsp
 
             else:
                 sp, _, coef, _ = SInceIGB(self.p, self.m, self.e, np.pi/2)
@@ -302,7 +310,7 @@ class InceGaussian:
                 Norm = (-1) ** ((self.m-1)/2) * factorial((self.p + 1)/2) * np.sqrt(4*self.e/np.pi) * coef[0] / self.w0 / sp / ds0
 
         self.IGB = igb*Norm
-        dx = np.abs(X[2,2] - X[1,0])
+        dx = np.abs(self.X[2,2] - self.X[1,0])
         Normalization = np.sum(np.sum(self.IGB * np.conj(self.IGB))) * dx ** 2
         print(f'Normalization: {np.real(Normalization)}')
 
@@ -322,29 +330,52 @@ class InceGaussian:
         plt.ylabel('y(m)')
         plt.show()
 
-    def Hologam(self):
+    def Hologam(self, gamma, theta, save:bool = False):
         '''
-        Considering a DMD with resolution of 1920x1080
+        Considering a DMD resolution of 1920x1080
         '''
-        Amp = np.abs(self.IGB)
+
+        self.kxy = self.k *np.sin(gamma)
+        self.kx = self.kxy * np.cos(theta)
+        self.ky = self.kxy * np.sin(theta)
+
+        Hologram = np.zeros((1080, 1920), dtype= np.uint8)
+
+        Beam = np.exp(1j* (self.kx * self.X + self.ky * self.Y)) * self.IGB
+
+        Amp = np.abs(Beam)
         Amp = Amp/np.max(Amp)
 
-        phi = np.angle(self.IGB)
+        phi = np.angle(Beam)
         pp = np.arcsin(Amp)
 
         qq = phi
 
-        self.CGH = 0.5 + 0.5 * np.sign(np.cos(pp) + np.cos(qq))
+        CoGH = _insertImage(1 - (0.5 + 0.5 * np.sign(np.cos(pp) + np.cos(qq))), Hologram)
+
+        if save:
+            Image.fromarray(CoGH * 255).convert('1').save('InceGauss.png')
+
+        return np.round((2**8-1)* CoGH).astype('uint8')
 
 
 
-Ince = InceGaussian(L = 15e-3, 
-                    N = 501, 
-                    parity = 0, 
-                    p = 6, 
-                    m = 2, 
-                    e = 2, 
-                    w0 = 4e-3, 
-                    k = (2*np.pi/632.8e-9),
-                    z = 0.375)
-Ince.plot_amplitude()
+def _insertImage(image,image_out):
+
+    N_v, N_u = image_out.shape
+
+    S_u = image.shape[1]
+    S_v = image.shape[0]
+  
+    u1, u2 = int(N_u/2 - S_u/2), int(N_u/2 + S_u/2)
+    v1, v2 = int(N_v/2 - S_v/2), int( N_v/2 + S_v/2)
+
+    if u1 < 0 or u2 > N_u:
+        raise Exception("Image could not be inserted because it is either too large in the u-dimension or the offset causes it to extend out of the input screen size")
+    if v1 < 0 or v2 > N_v:
+        raise Exception("Image could not be inserted because it is either too large in the v-dimension or the offset causes it to extend out of the input screen size")
+        
+    image_out[v1:v2,u1:u2] = image
+
+
+    return image_out
