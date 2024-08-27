@@ -67,7 +67,24 @@ class Beam:
                                          k = self.k,
                                          z = self.z)
             
+        elif self.type == 'Gaussian':
+            from Gaussian import Gaussian
+            self.Beam = Gaussian(L = self.L,
+                                 N = self.N,
+                                 w0= self.w0,
+                                 k = self.k,
+                                 z = self.z)
+
+            
         else:
             raise ValueError('Type not found')
+        
+    def plot_amplitude(self):
+        self.Beam.plot_amplitude()
 
+    def plot_phase(self):
+        self.Beam.plot_phase()
+
+    def Hologram(self, gamma:float, theta:float, save:bool = False):
+        self.Beam.Hologam(save = save, gamma = gamma, theta = theta)
 
