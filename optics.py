@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse
 from Beam import Beam
 from typing import Union
 
@@ -55,14 +56,41 @@ class Propagator:
         plt.show()
 
 
-Gauss = Beam(type = 'Gaussian',
-            size = 2e-3, 
-            shape = 2**8, 
-            w0 = 1e-3, 
-            k = (2*np.pi/632.8e-9),
-            z = 0)
+class StokesParameters:
+    def __init__(self,
+                 P1,
+                 P2,
+                 P3,
+                 P4) -> None:
+        self.P1 = P1
+        self.P2 = P2
+        self.P3 = P3
+        self.P4 = P4
 
-Gauss.plot_amplitude()
-Gauss_z = Propagator(beam= Gauss)
-Gauss_z.propagate(zi = 1/2 * (2*np.pi/632.8e-9) * (1e-3 ** 2) , zn = 2**8)
-Gauss_z.plot()
+
+        s0 = P1 + P2
+        s1 = (P1 - P2)/s0
+        s2 = (2*P3 - s0)/s0
+        s3 = (s0 - 2*P4)/s0
+
+        self.angle = np.rad2deg(0.5 * np.arctan(s2/s1))
+        print(self.angle)
+        self.E0x = np.sqrt(0.5*(1 + s1))
+        self.E0y = np.sqrt(0.5*(1 - s1))
+
+        self.total_polarization = np.sqrt(s1 ** 2 + s2 ** 2 + s3 ** 2)
+
+        self.plot_polarization()
+
+    def plot_polarization(self):
+        fig, ax = plt.subplots()
+        ellipse = Ellipse(xy = (0,0), width = 2*self.E0x, height = 2*self.E0y, angle = self.angle,  edgecolor='r', facecolor='none')
+        ax.add_patch(ellipse)
+        ax.axhline(y=0, color='black', linestyle='-')
+        ax.axvline(x=0, color='black', linestyle='-')
+        ax.set_xlim(-1, 1)
+        ax.set_ylim(-1, 1)
+        ax.set_aspect('equal')
+        ax.set_title(f'Polarization: {self.total_polarization}')
+
+        plt.show()

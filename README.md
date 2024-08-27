@@ -7,7 +7,7 @@
 
 
 ## Gaussian Modes
-$\frac{\omega_0}{\omega(z)}\exp{\frac{-r^2}{\omega(z)^2}} \exp{\left(-i\left(kz + k\frac{r^2}{2R(z)} - \psi(z) \right)\right)}$
+$U(r, \theta, z) = \frac{\omega_0}{\omega(z)}\exp{\frac{-r^2}{\omega(z)^2}} \exp{\left(-i\left(kz + k\frac{r^2}{2R(z)} - \psi(z) \right)\right)}$
 
 ### Code implementation
 

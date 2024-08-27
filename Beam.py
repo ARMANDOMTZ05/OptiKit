@@ -24,60 +24,61 @@ class Beam:
         self.L = 15e-3 if 'size' not in kwargs else kwargs['size']
 
 
+        match self.type:
 
-        if self.type == 'InceGaussian':
-            self.p = 2 if 'p' not in kwargs else kwargs['p']
-            self.m = 2 if 'm' not in kwargs else kwargs['m']
-            self.e = 2 if 'elipticity' not in kwargs else kwargs['elipticity']
-            self.parity = 0 if 'parity' not in kwargs else kwargs['parity']
-            from InceGauss import InceGaussian
-            self.Beam = InceGaussian(L = self.L,
-                                     N = self.N,
-                                     parity = self.parity,
-                                     p = self.p,
-                                     m = self.m,
-                                     e = self.e,
-                                     w0 = self.w0,
-                                     k = self.k,
-                                     z = self.z)
-            
-        elif self.type == 'HermiteGaussian':
-            self.m = 2 if 'm' not in kwargs else kwargs['m']
-            self.n = 2 if 'n' not in kwargs else kwargs['n']
-
-            from HermiteGauss import HermiteGaussian
-            self.Beam = HermiteGaussian(L = self.L,
-                                        size = self.N,
-                                        n = self.n,
+            case 'InceGaussian':
+                self.p = 2 if 'p' not in kwargs else kwargs['p']
+                self.m = 2 if 'm' not in kwargs else kwargs['m']
+                self.e = 2 if 'elipticity' not in kwargs else kwargs['elipticity']
+                self.parity = 0 if 'parity' not in kwargs else kwargs['parity']
+                from InceGauss import InceGaussian
+                self.Beam = InceGaussian(L = self.L,
+                                        N = self.N,
+                                        parity = self.parity,
+                                        p = self.p,
                                         m = self.m,
+                                        e = self.e,
                                         w0 = self.w0,
                                         k = self.k,
                                         z = self.z)
             
-        elif self.type == 'LaguerreGaussian':
-            self.p = 2 if 'p' not in kwargs else kwargs['p']           
-            self.l = 2 if 'm' not in kwargs else kwargs['l']
+            case 'HermiteGaussian':
+                self.m = 2 if 'm' not in kwargs else kwargs['m']
+                self.n = 2 if 'n' not in kwargs else kwargs['n']
 
-            from LaguerreGauss import LaguerreGaussian
-            self.Beam = LaguerreGaussian(L = self.L,
-                                         size = self.N,
-                                         p = self.p,
-                                         l = self.l,
-                                         w0 = self.w0,
-                                         k = self.k,
-                                         z = self.z)
+                from HermiteGauss import HermiteGaussian
+                self.Beam = HermiteGaussian(L = self.L,
+                                            size = self.N,
+                                            n = self.n,
+                                            m = self.m,
+                                            w0 = self.w0,
+                                            k = self.k,
+                                            z = self.z)
             
-        elif self.type == 'Gaussian':
-            from Gaussian import Gaussian
-            self.Beam = Gaussian(L = self.L,
-                                 N = self.N,
-                                 w0= self.w0,
-                                 k = self.k,
-                                 z = self.z)
+            case 'LaguerreGaussian':
+                self.p = 2 if 'p' not in kwargs else kwargs['p']           
+                self.l = 2 if 'm' not in kwargs else kwargs['l']
+
+                from LaguerreGauss import LaguerreGaussian
+                self.Beam = LaguerreGaussian(L = self.L,
+                                            size = self.N,
+                                            p = self.p,
+                                            l = self.l,
+                                            w0 = self.w0,
+                                            k = self.k,
+                                            z = self.z)
+            
+            case 'Gaussian':
+                from Gaussian import Gaussian
+                self.Beam = Gaussian(L = self.L,
+                                    N = self.N,
+                                    w0= self.w0,
+                                    k = self.k,
+                                    z = self.z)
 
             
-        else:
-            raise ValueError('Type not found')
+            case _:
+                raise ValueError('Type not found')
         
     def plot_amplitude(self):
         self.Beam.plot_amplitude()
