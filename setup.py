@@ -4,7 +4,6 @@ setup(
    name='pyOptics',
    version='0.1.1a',
    description='A basic optics module',
-   long_description=open('README.md').read().strip(),
    author='Armando Martinez',
    author_email='ar.martinez.hdz@hotmail.com',
    url= 'https://github.com/ARMANDOMTZ05/pyOptics',
