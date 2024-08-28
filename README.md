@@ -148,7 +148,7 @@ slm.updateArray(Hologram)
 ## Propagator
 The equation is solve numericaly by applying a transfer function.
 
-$U(z) = \mathfrak{F}^{-1}\left\{H\cdot \mathfrak{F}\{U_0\}\right\}$
+$U(z) = \\mathfrak{F}^{-1}\\left\\{H\\cdot \\mathfrak{F}\\{U_0\\}\\right\\}$
 
 where $H = \exp\left(-i kz\sqrt{k_0^2 -\left(k_x^2+k_y^2\right)}\right)$ and $U_0$ represents the initial field.
 
