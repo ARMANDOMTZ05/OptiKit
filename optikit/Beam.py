@@ -1,19 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 class Beam:
     def __init__(self,
                  *args,
                  **kwargs) -> None:
         
-        """
-        Beam is an object to generate a Ince-Gaussian Mode, Laguerre-Gaussian Mode and Hermite-Gaussian mode with the soecified valuess
-
-        Input
-
-        
-
-        """
         
         assert kwargs['type'] is not None, 'Beam type has to be specified'
         self.type = 'HermiteGaussian' if 'type' not in kwargs else kwargs['type']
@@ -31,7 +22,7 @@ class Beam:
                 self.m = 2 if 'm' not in kwargs else kwargs['m']
                 self.e = 2 if 'elipticity' not in kwargs else kwargs['elipticity']
                 self.parity = 0 if 'parity' not in kwargs else kwargs['parity']
-                from InceGauss import InceGaussian
+                from .InceGauss import InceGaussian
                 self.Beam = InceGaussian(L = self.L,
                                         N = self.N,
                                         parity = self.parity,
@@ -46,7 +37,7 @@ class Beam:
                 self.m = 2 if 'm' not in kwargs else kwargs['m']
                 self.n = 2 if 'n' not in kwargs else kwargs['n']
 
-                from HermiteGauss import HermiteGaussian
+                from .HermiteGauss import HermiteGaussian
                 self.Beam = HermiteGaussian(L = self.L,
                                             size = self.N,
                                             n = self.n,
@@ -59,7 +50,7 @@ class Beam:
                 self.p = 2 if 'p' not in kwargs else kwargs['p']           
                 self.l = 2 if 'm' not in kwargs else kwargs['l']
 
-                from LaguerreGauss import LaguerreGaussian
+                from .LaguerreGauss import LaguerreGaussian
                 self.Beam = LaguerreGaussian(L = self.L,
                                             size = self.N,
                                             p = self.p,
@@ -69,7 +60,7 @@ class Beam:
                                             z = self.z)
             
             case 'Gaussian':
-                from Gaussian import Gaussian
+                from .Gaussian import Gaussian
                 self.Beam = Gaussian(L = self.L,
                                     N = self.N,
                                     w0= self.w0,

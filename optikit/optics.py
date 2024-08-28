@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
-from Beam import Beam
+from .Beam import Beam
 from typing import Union
 
 class Propagator:
@@ -22,8 +22,6 @@ class Propagator:
             self.N = beam.shape[0]
             if self.beam.shape[0] != self.beam.shape[1]:
                 raise ValueError('The shape of the Beam matrix must be NxN')
-        else:
-            raise ValueError('Beam needs to be either np.ndarray or Beam class')
         
         if self.N % 2 == 0:
             fx = np.arange(-self.N//2, self.N//2) * (np.pi/self.L)
@@ -47,12 +45,12 @@ class Propagator:
             self.prop_beam[:,:,i] = np.fft.ifft2(np.fft.ifftshift(a1))
     
     def plot(self):
-        plt.imshow(np.abs(self.prop_beam[:,self.N//2,:]))
+        plt.imshow(np.abs(self.prop_beam[:,self.N//2,:]) ** 2)
         plt.colorbar()
         plt.show()
 
     def plot_amplitude(self):
-        plt.imshow(np.abs(self.prop_beam[:,:,-1]), extent=[-self.L, self.L, -self.L, self.L])
+        plt.imshow(np.abs(self.prop_beam[:,:,-1])**2, extent=[-self.L, self.L, -self.L, self.L])
         plt.show()
 
 

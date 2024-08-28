@@ -4,12 +4,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 def Mesh_Elliptic(f, L, N):
-    """"
-    Creates eliptical coordinates
 
-    Input
-
-    """
     x, y = np.linspace(-L, L, N), np.linspace(-L, L, N)
     Y, X = np.meshgrid(x, y)
 
@@ -225,6 +220,31 @@ def SInceIGB(p,m,q,z):
         return ip, eta, coef, dip
 
 class InceGaussian:
+    """
+    A class to represent and generate Ince-Gaussian modes.
+
+    The `InceGaussian` class generates a Ince-Gaussian mode based on the specified parameters parity, p, m and ellipcity.
+    It also supports the generation of binary holograms tailored to Spatial Light Modulators (SLMs) with a resolution of 1920x1080.
+
+    Attributes:
+        L (float): Size of the computational domain.
+        parity (int): Parity of the mode (0 for even, 1 for odd).
+        p (int): Mode order (p ≥ 0).
+        m (int): Mode index (m ≤ p).
+        e (float): Ellipticity parameter.
+        w0 (float): Beam waist at z = 0.
+        k (float): Wave number.
+        z (float, optional): Propagation distance
+        N (int, optional): Number of grid points (must be odd).
+
+    Methods:
+        plot_amplitude():s
+            Plots the amplitude of the Hermite-Gaussian mode.
+        plot_phase():
+            Plots the phase of the Hermite-Gaussian mode.
+        Hologram(gamma, theta, save=False):
+            Generates and optionally saves a binary hologram.
+    """
     def __init__(self, L: float,
                  parity: int,
                  p,
@@ -236,7 +256,22 @@ class InceGaussian:
                  N: int = 501) -> None:
         
         """
-        Ince-Gaussian Modes
+        Initialize the Ince-Gaussian Modes class.
+
+        Parameters:
+        L (float): Size of the computational domain.
+        parity (int): Parity of the mode (0 for even, 1 for odd).
+        p (int): Mode order (p ≥ 0).
+        m (int): Mode index (m ≤ p).
+        e (float): Ellipticity parameter.
+        w0 (float): Beam waist at z = 0.
+        k (float): Wave number.
+        z (float, optional): Propagation distance. Default is 0.
+        N (int, optional): Number of grid points (must be odd). Default is 501.
+
+        Raises:
+        Exception: If N is not odd.
+        Exception: If m is out of range or p and m do not have the same parity.
         """
     
         self.L = L
@@ -309,21 +344,31 @@ class InceGaussian:
                 ds0 = SInceIGB(self.p, self.m, self.m, 0)[-1]
                 Norm = (-1) ** ((self.m-1)/2) * factorial((self.p + 1)/2) * np.sqrt(4*self.e/np.pi) * coef[0] / self.w0 / sp / ds0
 
-        self.IGB = igb*Norm
+        self.Beam = igb*Norm
         dx = np.abs(self.X[2,2] - self.X[1,0])
         Normalization = np.sum(np.sum(self.IGB * np.conj(self.IGB))) * dx ** 2
         print(f'Normalization: {np.real(Normalization)}')
 
 
     def plot_amplitude(self):
-        plt.imshow(np.abs(self.IGB), extent=[-self.L, self.L, -self.L, self.L] ,cmap= 'gray')
+        """
+        Plot the amplitude of the Ince-Gaussian mode.
+
+        This method visualizes the magnitude of the Ince-Gaussian mode on a 2D grid.
+        """
+        plt.imshow(np.abs(self.Beam), extent=[-self.L, self.L, -self.L, self.L] ,cmap= 'gray')
         plt.title(f'Ince-Gaussian Mode p={self.p}, m = {self.m}, $\epsilon$={self.e}, z={self.z}')
         plt.xlabel('x(m)')
         plt.ylabel('y(m)')
         plt.show()
 
     def plot_phase(self):
-        plt.imshow(np.angle(self.IGB) ,cmap= 'gray')
+        """
+        Plot the phase of the Ince-Gaussian mode.
+
+        This method visualizes the phase of the Ince-Gaussian mode on a 2D grid.
+        """
+        plt.imshow(np.angle(self.Beam) ,cmap= 'gray')
         plt.title(f'Phase Ince-Gaussian Mode p={self.p}, m = {self.m}, $\epsilon$ = {self.e}, z = {self.z}')
         plt.colorbar()
         plt.xlabel('x(m)')
@@ -331,9 +376,20 @@ class InceGaussian:
         plt.show()
 
     def Hologam(self, gamma, theta, save:bool = False):
-        '''
-        Considering a DMD resolution of 1920x1080
-        '''
+        """
+        Generate a binary hologram based on the Ince-Gaussian mode.
+
+        This method generates a binary hologram that can be used with a Digital Micromirror Device (DMD)
+        or Spatial Light Modulator (SLM) of resolution 1920x1080.
+
+        Parameters:
+            gamma (float): The angle in radians that defines the off-axis tilt of the hologram.
+            theta (float): The angle in radians that defines the azimuthal direction of the off-axis tilt.
+            save (bool): If True, saves the generated hologram as 'InceGauss.png'. Default is False.
+
+        Returns:
+            np.ndarray: The generated binary hologram as a 1920x1080 array.
+        """
 
         self.kxy = self.k *np.sin(gamma)
         self.kx = self.kxy * np.cos(theta)
@@ -361,7 +417,16 @@ class InceGaussian:
 
 
 def _insertImage(image,image_out):
+    """
+    Insert a smaller image into the center of a larger image array.
 
+    Parameters:
+        image (np.ndarray): The smaller image to be inserted.
+        image_out (np.ndarray): The larger output image array.
+
+    Returns:
+        np.ndarray: The combined image with the smaller image inserted at the center.
+    """
     N_v, N_u = image_out.shape
 
     S_u = image.shape[1]
